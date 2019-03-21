@@ -35,8 +35,6 @@ with open(file_name, 'r') as File:
 	
 	# read in file
 	reader = csv.reader(File, dialect='tab_delim')
-	#Range r value corresponds to (3/16)*500 sterile + 3/16*(250) sterile replicates
-	#Range calue r2 corresponds to 406 fertile replicates from 500- 500*3/16 
 	r = list(range(0, range_value1))
 	r2 = list(range(range_value1, range_value2))
 	
