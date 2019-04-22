@@ -7,6 +7,7 @@ csv.register_dialect('tab_delim', delimiter="\t", quoting=csv.QUOTE_NONE)
 
 file_name = sys.argv[1] 
 number_sequenced = int(sys.argv[2])
+number_sequenced = int(number_sequenced + number_sequenced)
 
 # function to enumerate rows
 def read_lines(csv_reader, row_list):
@@ -14,21 +15,18 @@ def read_lines(csv_reader, row_list):
 		if row_number in row_list:
 			yield row_number, row
 
+def drop(mylist, n):
+   del mylist[0::n]
+
 #functions to delete within-chromosome comparisons
 def myrange1():
 	for value in reversed(range(401,500)):
 		yield value
 def myrange2():
-	for value in reversed(range(301,402)):
+	for value in reversed(range(201,402)):
 		yield value
 def myrange3():
-	for value in reversed(range(201,302)):
-		yield value
-def myrange4():
-	for value in reversed(range(101,202)):
-		yield value
-def myrange5():
-	for value in reversed(range(1,102)):
+	for value in reversed(range(1,202)):
 		yield value
 
 with open(file_name, 'r') as File:
@@ -41,6 +39,9 @@ with open(file_name, 'r') as File:
 		row_tuples = list(it.combinations(row, 2))
 		comparisons.append(row_tuples)
 
+	drop(comparisons, 2)
+	
+	# Delete all within-chromosome comparisons
 	first_value = 0
 	second_value = 98
 	set1 = []
@@ -51,7 +52,7 @@ with open(file_name, 'r') as File:
 		second_value = second_value + value - 1
 
 	third_value = 44149
-	fourth_value = 44249
+	fourth_value = 44349
 	set2 = []
 	for value in myrange2():
 		removed_comps = list(range(third_value,fourth_value + 1))
@@ -59,34 +60,16 @@ with open(file_name, 'r') as File:
 		third_value = third_value + value
 		fourth_value = fourth_value + value - 1
 
-	fifth_value = 79299
-	sixth_value = 79399
+	fifth_value = 104449
+	sixth_value = 104649
 	set3 = []
 	for value in myrange3():
-		removed_comps = list(range(fifth_value,sixth_value + 1))
+		removed_comps = list(range(fifth_value, sixth_value + 1))
 		set3.append(removed_comps)
 		fifth_value = fifth_value + value
 		sixth_value = sixth_value + value - 1	
 
-	seventh_value = 104449
-	eigth_value = 104549
-	set4 = []
-	for value in myrange4():
-		removed_comps = list(range(seventh_value,eigth_value + 1))
-		set4.append(removed_comps)
-		seventh_value = seventh_value + value
-		eigth_value = eigth_value + value - 1	
-
-	ninth_value = 119599
-	tenth_value = 119699
-	set5 = []
-	for value in myrange5():
-		removed_comps = list(range(ninth_value,tenth_value + 1))
-		set5.append(removed_comps)
-		ninth_value = ninth_value + value
-		tenth_value = tenth_value + value - 1
-
-	combined_sets = set1 + set2 + set3 + set4 + set5
+	combined_sets = set1 + set2 + set3
 	combined_sets = list((list(it.chain(*combined_sets))))
 	combined_sets = list(set(combined_sets))
 	combined_sets = sorted(combined_sets, reverse=True)
@@ -97,6 +80,7 @@ with open(file_name, 'r') as File:
 
 	window_list_comparisons = list(map(list, zip(*comparisons)))
 
+	#calculate p-values for each window
 	p_values = []
 	for window in window_list_comparisons:
 		fishergroup1 = []
