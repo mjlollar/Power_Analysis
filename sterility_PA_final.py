@@ -26,7 +26,7 @@ with open(file_name, 'r') as File:
 	# Generate all pairwise combinations of window pairs
 
 	for row_number, row in read_lines(reader, window1):
-		row_tuples = list(it.combinations(row, 2))
+		row_tuples = list(it.permutations(row, 2))
 		replicate_list.append(row_tuples)
 
 	# Randomly picked X-A and A-A pair that are defined as our sterility loci
