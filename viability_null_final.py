@@ -2,99 +2,91 @@
 
 import sys
 import csv
+import collections
 import scipy.stats as sp
 import itertools as it
 
 csv.register_dialect('tab_delim', delimiter="\t", quoting=csv.QUOTE_NONE)
 
-#Input arguments taken
 file_name = sys.argv[1] 
 number_sequenced = int(sys.argv[2])
-number_sequenced2 = int(number_sequenced*2)
 
-# function to enumerate rows
 def read_lines(csv_reader, row_list):
 	for row_number, row in enumerate(csv_reader):
 		if row_number in row_list:
 			yield row_number, row
 
-#functions used in deletion of within-chromosome comparisons
+def flatten(my_list):
+    for value in my_list:
+        if isinstance(value, collections.Iterable) and not isinstance(value, (str, bytes)):
+            yield from flatten(value)
+        else:
+            yield value
+
 def myrange1():
-	for value in reversed(range(401,500)):
+	for value in range(0,100):
 		yield value
 def myrange2():
-	for value in reversed(range(201,402)):
+	for value in range(0,199):
 		yield value
 def myrange3():
-	for value in reversed(range(1,202)):
+	for value in range(0,200):
 		yield value
-
-# Use every other fly in text file, increases "randomness" of selection
-# although I am not sure if this really matters. Does decrease null p-values in some cases.
-def drop(mylist, n):
-	del mylist[::n]
-
 
 with open(file_name, 'r') as File:
 	reader = csv.reader(File, dialect='tab_delim')
-	r = list(range(0, number_sequenced2))
+	r = list(range(0, number_sequenced))
 	
-	# Generate tuples of all pairwise window combinations and add to master list "comparisons"
-	# Nested list, nested lists are indidivduals 
 	comparisons = []
-	for row_number, row in read_lines(reader, r):
-		row_tuples = list(it.combinations(row, 2))
+	for row_number, row in read_lines(reader,r):
+		row_tuples = list(it.permutations(row, 2))
 		comparisons.append(row_tuples)
 
-	drop(comparisons, 2)
-
-	# Delete all within-chromosome comparisons
-	# 500c2 yields 124750 pairwise comparisons. Tuple generation works
-	# by comparing window1-window2[0], window1-window3[1], .... window1-window500[499], window2-window3[500], window2-window4[501], etc.
-	# Determined the index ranges that corresponds to comparisons within each chromosome and put them in list
-	# X-chromosome comparisons
-	first_value = 0
-	second_value = 98
+	first_value = 99
+	second_value = 498
 	set1 = []
 	for value in myrange1():
-		removed_comps = list(range(first_value,second_value + 1))
-		set1.append(removed_comps)
-		first_value = first_value + value
-		second_value = second_value + value - 1
+		perms = list(range(first_value,second_value + 1))
+		set1.append(perms)
+		first_value = first_value + 499
+		second_value = second_value + 499	
+	adds1 = range(49900, 50000)
+	set1.append(adds1)
+	set1 = flatten(set1)
+	set1 = list(set1)
 
-	#2nd chromosome comparisons
-	third_value = 44149
-	fourth_value = 44349
+	third_value = 50199
+	fourth_value = 50498
 	set2 = []
 	for value in myrange2():
-		removed_comps = list(range(third_value,fourth_value + 1))
-		set2.append(removed_comps)
-		third_value = third_value + value
-		fourth_value = fourth_value + value - 1
+		perms = list(range(third_value,fourth_value + 1))
+		set2.append(perms)
+		third_value = third_value + 499
+		fourth_value = fourth_value + 499
+	adds2 = range(149500, 149700)
+	set2.append(adds2)
+	set2 = flatten(set2)
+	set2 = list(set2)
+	set2.remove(149300)
 
-	#3rd chromosome comparisons
-	fifth_value = 104449
-	sixth_value = 104649
+	fifth_value = 149700
+	sixth_value = 149999
 	set3 = []
 	for value in myrange3():
-		removed_comps = list(range(fifth_value, sixth_value + 1))
-		set3.append(removed_comps)
-		fifth_value = fifth_value + value
-		sixth_value = sixth_value + value - 1	
+		perms = list(range(fifth_value, sixth_value + 1))
+		set3.append(perms)
+		fifth_value = fifth_value + 499
+		sixth_value = sixth_value +	499
+	set3 = flatten(set3)
+	set3 = list(set3)
 
-	#Combine list of all index values corresponding to within chromosome comparisons and reverse order
-	#Reversal necessary so that iteration doesn't disrupt tuple index
 	combined_sets = set1 + set2 + set3
-	combined_sets = list((list(it.chain(*combined_sets))))
-	combined_sets = list(set(combined_sets))
-	combined_sets = sorted(combined_sets, reverse=True)
 
-	#Iterate through nested list to remove all within chromosome comparisons
+	final_comparisons = []
 	for i in range(0,number_sequenced):
 		for value in combined_sets:
-			del comparisons[i][value]
+			final_comparisons.append(comparisons[i][value])
 
-	#Rearange nested list so that each new nested list contains all sampled individuals for a given window 
 	window_list_comparisons = list(map(list, zip(*comparisons)))
 
 	#calculate p-values for each window
@@ -130,6 +122,7 @@ with open(file_name, 'r') as File:
 
 	#Take minimum pvalue from all windows and print it
 	lowest_pvalue = min(p_values)
-	print(lowest_pvalue)
+	indexpvalue = p_values.index(lowest_pvalue)
+	print(lowest_pvalue, indexpvalue)
 
 	File.close()
