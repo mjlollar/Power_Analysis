@@ -82,16 +82,16 @@ with open(file_name, 'r') as File:
 
 	combined_sets = set1 + set2 + set3
 
-	final_comparisons = []
-	for i in range(0,number_sequenced):
-		for value in combined_sets:
-			final_comparisons.append(comparisons[i][value])
-
-	window_list_comparisons = list(map(list, zip(*comparisons)))
-
+	int_comparisons = []
+	for value in combined_sets:
+		for row in comparisons:
+			int_comparisons.append(row[value])
+	
+	final_comparisons = [int_comparisons[i:i+number_sequenced] for i in range(0, len(int_comparisons), number_sequenced)]
+	
 	#calculate p-values for each window
 	p_values = []
-	for window in window_list_comparisons:
+	for window in final_comparisons:
 		fishergroup1 = []
 		fishergroup2 = []
 		fishergroup3 = []
@@ -122,7 +122,6 @@ with open(file_name, 'r') as File:
 
 	#Take minimum pvalue from all windows and print it
 	lowest_pvalue = min(p_values)
-	indexpvalue = p_values.index(lowest_pvalue)
-	print(lowest_pvalue, indexpvalue)
+	print(lowest_pvalue)
 
 	File.close()
