@@ -40,7 +40,7 @@ with open(file_name, 'r') as File:
 	
 	# Generate tuples of all pairwise window combinations and add to master list
 	for row_number, row in read_lines(reader, r):
-		row_tuples = list(it.permutations(row, 2))
+		row_tuples = list(it.combinations(row, 2))
 		combined_list_sterile.append(row_tuples)
 	
 	# Rearrange list of tuples for each row such that windows are grouped by position across rows
